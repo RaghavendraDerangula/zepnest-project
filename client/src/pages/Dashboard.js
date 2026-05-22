@@ -68,7 +68,7 @@ function Dashboard() {
       await API.put(
         `/requests/${id}`,
         {
-          status: 'Completed'
+          status: 'completed'
         }
       );
 
@@ -143,11 +143,11 @@ function Dashboard() {
                 All Status
               </option>
 
-              <option value="Pending">
+              <option value="pending">
                 Pending
               </option>
 
-              <option value="Completed">
+              <option value="completed">
                 Completed
               </option>
 
@@ -175,12 +175,20 @@ function Dashboard() {
 
                 <div className="card shadow-lg h-100">
 
-                  <img
-                    src={`http://localhost:5000/uploads/${req.image}`}
-                    alt="request"
-                    className="card-img-top"
-                    height="240"
-                  />
+                  {
+                    req.image &&
+                    (
+                      <img
+                        src={req.image}
+                        alt="request"
+                        className="card-img-top"
+                        height="240"
+                        style={{
+                          objectFit: "cover"
+                        }}
+                      />
+                    )
+                  }
 
                   <div className="card-body d-flex flex-column">
 
@@ -204,7 +212,7 @@ function Dashboard() {
 
                       <span
                         className={
-                          req.status === 'Completed'
+                          req.status === 'completed'
                           ?
                           'text-success'
                           :
