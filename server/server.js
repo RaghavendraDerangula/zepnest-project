@@ -17,8 +17,10 @@ app.use(
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
+const requestRoutes = require("./routes/requestRoutes");
 
 app.use("/api/auth", authRoutes);
+app.use("/api/requests", requestRoutes);
 
 // Default Route
 app.get("/", (req, res) => {
