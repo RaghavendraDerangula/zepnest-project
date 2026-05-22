@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://zepnest-backend.onrender.com'
+  baseURL: 'https://zepnest-backend.onrender.com/api/auth'
 });
 
 API.interceptors.request.use((req) => {
