@@ -1,321 +1,126 @@
-import React, {
-  useEffect,
-  useState
-} from 'react';
+import React, { useEffect, useState } from "react";
+import API from "../services/api";
+import { toast } from "react-toastify";
 
-import API from '../services/api';
-
-import Navbar from '../components/Navbar';
-
-import {
-  toast
-} from 'react-toastify';
-
-import {
-  motion
-} from 'framer-motion';
-
-function Dashboard() {
-
+const Dashboard = () => {
   const [requests, setRequests] = useState([]);
-
-  const [search, setSearch] = useState('');
-
-  const [statusFilter, setStatusFilter] = useState('');
-
-  useEffect(() => {
-
-    fetchRequests();
-
-  }, []);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
   const fetchRequests = async () => {
-
     try {
-
-      const res = await API.get('/requests');
+      const res = await API.get("/requests");
 
       setRequests(res.data);
-
     } catch (err) {
-
       console.log(err);
-
-      toast.error('Failed to Fetch Requests');
-
+      toast.error("Failed to fetch requests");
     }
   };
 
-  const updateStatus = async (
-    id,
-    status
-  ) => {
-
-    try {
-
-      await API.put(
-        `/requests/${id}`,
-        { status }
-      );
-
-      toast.success(
-        `Request ${status}`
-      );
-
-      fetchRequests();
-
-    } catch (err) {
-
-      console.log(err);
-
-      toast.error('Update Failed');
-
-    }
-  };
+  useEffect(() => {
+    fetchRequests();
+  }, []);
 
   const deleteRequest = async (id) => {
-
     try {
+      await API.delete(`/requests/${id}`);
 
-      await API.delete(
-        `/requests/${id}`
-      );
-
-      toast.success(
-        'Request Deleted'
-      );
+      toast.success("Request Deleted");
 
       fetchRequests();
-
     } catch (err) {
-
       console.log(err);
-
-      toast.error(
-        'Delete Failed'
-      );
-
+      toast.error("Delete Failed");
     }
   };
 
   const filteredRequests = requests.filter((req) => {
-
     const matchesSearch =
-      req.title
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      req.title.toLowerCase().includes(search.toLowerCase()) ||
+      req.category.toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus =
-      statusFilter === ''
-      ||
-      req.status === statusFilter;
+      statusFilter === "All" || req.status === statusFilter;
 
     return matchesSearch && matchesStatus;
-
   });
 
   return (
+    <div className="container mt-5">
+      <h1 className="text-center mb-4">My Service Requests</h1>
 
-    <>
+      <div className="d-flex gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Search Requests"
+          className="form-control"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-      <Navbar />
-
-      <div className="container mt-5">
-
-        <h1 className="dashboard-title text-center mb-4">
-          My Service Requests
-        </h1>
-
-        <div className="row mb-4 search-section">
-
-          <div className="col-md-6">
-
-            <input
-              type="text"
-              placeholder="Search Requests"
-              className="form-control"
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-            />
-
-          </div>
-
-          <div className="col-md-6">
-
-            <select
-              className="form-select"
-              value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value)
-              }
-            >
-
-              <option value="">
-                All Status
-              </option>
-
-              <option value="Pending">
-                Pending
-              </option>
-
-              <option value="Completed">
-                Completed
-              </option>
-
-              <option value="Cancelled">
-                Cancelled
-              </option>
-
-            </select>
-
-          </div>
-
-        </div>
-
-        <div className="row">
-
-          {
-            filteredRequests.length === 0
-            ?
-            <p className="text-center text-white">
-              No Requests Found
-            </p>
-            :
-            filteredRequests.map((req) => (
-
-              <motion.div
-                key={req.id}
-                className="col-md-6 col-lg-4 mb-4"
-                whileHover={{
-                  scale: 1.03,
-                  rotateY: 5
-                }}
-                initial={{
-                  opacity: 0,
-                  y: 40
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0
-                }}
-                transition={{
-                  duration: 0.5
-                }}
-              >
-
-                <div className="card shadow-lg h-100">
-
-                  <img
-                    src={`http://localhost:5000/uploads/${req.image}`}
-                    alt="request"
-                    className="card-img-top"
-                    height="240"
-                  />
-
-                  <div className="card-body d-flex flex-column">
-
-                    <h3 className="mb-3">
-                      {req.title}
-                    </h3>
-
-                    <p className="text-muted">
-                      {req.description}
-                    </p>
-
-                    <p>
-                      <strong>Category:</strong>
-                      {' '}
-                      {req.category}
-                    </p>
-
-                    <p>
-
-                      <strong>Status:</strong>
-                      {' '}
-
-                      <span
-                        className={
-                          req.status === 'Completed'
-                          ?
-                          'text-success'
-                          :
-                          req.status === 'Cancelled'
-                          ?
-                          'text-danger'
-                          :
-                          'text-warning'
-                        }
-                      >
-                        {req.status}
-                      </span>
-
-                    </p>
-
-                    <div className="mt-auto">
-
-                      {
-                        req.status === 'Pending' && (
-
-                          <>
-
-                            <button
-                              className="btn btn-success me-2"
-                              onClick={() =>
-                                updateStatus(
-                                  req.id,
-                                  'Completed'
-                                )
-                              }
-                            >
-                              Complete
-                            </button>
-
-                            <button
-                              className="btn btn-warning me-2"
-                              onClick={() =>
-                                updateStatus(
-                                  req.id,
-                                  'Cancelled'
-                                )
-                              }
-                            >
-                              Cancel
-                            </button>
-
-                          </>
-
-                        )
-                      }
-
-                      <button
-                        className="btn btn-danger"
-                        onClick={() =>
-                          deleteRequest(req.id)
-                        }
-                      >
-                        Delete
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </motion.div>
-
-            ))
-          }
-
-        </div>
-
+        <select
+          className="form-select w-auto"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="All">All Status</option>
+          <option value="pending">pending</option>
+          <option value="completed">completed</option>
+        </select>
       </div>
 
-    </>
+      <div className="row">
+        {filteredRequests.map((request) => (
+          <div className="col-md-4 mb-4" key={request.id}>
+            <div className="card shadow border-0 rounded-4 h-100">
+              {request.image && (
+                <img
+                  src={`https://zepnest-backend.onrender.com/uploads/${request.image}`}
+                  alt="request"
+                  style={{
+                    width: "100%",
+                    height: "220px",
+                    objectFit: "cover",
+                    borderTopLeftRadius: "16px",
+                    borderTopRightRadius: "16px",
+                  }}
+                />
+              )}
 
+              <div className="card-body">
+                <h4>{request.title}</h4>
+
+                <p>
+                  <strong>Category:</strong> {request.category}
+                </p>
+
+                <p>
+                  <strong>Status:</strong>{" "}
+                  <span
+                    className={
+                      request.status === "completed"
+                        ? "text-success"
+                        : "text-warning"
+                    }
+                  >
+                    {request.status}
+                  </span>
+                </p>
+
+                <button
+                  className="btn btn-danger"
+                  onClick={() => deleteRequest(request.id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
-}
+};
 
 export default Dashboard;
