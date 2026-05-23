@@ -11,14 +11,17 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "https://zepnest-project-hspj.vercel.app",
+    origin: "https://zepnest-tau.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
-// IMPORTANT: Serve uploads folder
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Uploads Folder Access
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"))
+);
 
 // Routes
 const authRoutes = require("./routes/authRoutes");

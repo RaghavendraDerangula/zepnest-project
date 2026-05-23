@@ -86,7 +86,7 @@ function Dashboard() {
 
       <div className="container mt-5">
 
-        {/* HELLO SECTION */}
+        {/* Heading */}
 
         <div className="mb-5">
 
@@ -100,7 +100,7 @@ function Dashboard() {
 
         </div>
 
-        {/* SEARCH + FILTER */}
+        {/* Search + Filter */}
 
         <div className="row mb-4">
 
@@ -142,7 +142,7 @@ function Dashboard() {
 
         </div>
 
-        {/* REQUESTS */}
+        {/* Cards */}
 
         <div className="row">
 
@@ -160,7 +160,7 @@ function Dashboard() {
                 className="col-md-6 col-lg-4 mb-4"
               >
 
-                <div className="card shadow-lg border-0 h-100 rounded-4">
+                <div className="card shadow-lg border-0 rounded-4 h-100">
 
                   {/* IMAGE */}
 
@@ -232,6 +232,9 @@ function Dashboard() {
 
                       <button
                         className="btn btn-warning me-2"
+                        onClick={() =>
+                          deleteRequest(req.id)
+                        }
                       >
                         Cancel
                       </button>
