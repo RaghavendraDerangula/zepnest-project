@@ -1,16 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  useEffect,
+  useState
+} from 'react';
+
 import API from '../services/api';
+
 import Navbar from '../components/Navbar';
-import { toast } from 'react-toastify';
+
+import {
+  toast
+} from 'react-toastify';
 
 function Dashboard() {
 
   const [requests, setRequests] = useState([]);
+
   const [search, setSearch] = useState('');
+
   const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
+
     fetchRequests();
+
   }, []);
 
   const fetchRequests = async () => {
@@ -24,6 +36,7 @@ function Dashboard() {
     } catch (err) {
 
       console.log(err);
+
       toast.error('Failed to Fetch Requests');
 
     }
@@ -42,6 +55,7 @@ function Dashboard() {
     } catch (err) {
 
       console.log(err);
+
       toast.error('Delete Failed');
 
     }
@@ -51,9 +65,12 @@ function Dashboard() {
 
     try {
 
-      await API.put(`/requests/${id}`, {
-        status: 'Completed'
-      });
+      await API.put(
+        `/requests/${id}`,
+        {
+          status: 'completed'
+        }
+      );
 
       toast.success('Status Updated');
 
@@ -62,6 +79,7 @@ function Dashboard() {
     } catch (err) {
 
       console.log(err);
+
       toast.error('Update Failed');
 
     }
@@ -70,69 +88,66 @@ function Dashboard() {
   const filteredRequests = requests.filter((req) => {
 
     const matchesSearch =
-      req.title.toLowerCase().includes(search.toLowerCase());
+      req.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
 
     const matchesStatus =
-      statusFilter === '' ||
-      req.status?.toLowerCase() === statusFilter.toLowerCase();
+      statusFilter === ''
+      ||
+      req.status === statusFilter;
 
     return matchesSearch && matchesStatus;
 
   });
 
   return (
+
     <>
+
       <Navbar />
 
       <div className="container mt-5">
 
-        {/* Heading */}
+        <h1 className="dashboard-title text-center mb-4">
+          My Service Requests
+        </h1>
 
-        <div className="mb-5">
+        <div className="row mb-4 search-section">
 
-          <h1 className="fw-bold">
-            Hello, Raghavendra 👋
-          </h1>
-
-          <p className="text-muted">
-            Here's an overview of your service requests.
-          </p>
-
-        </div>
-
-        {/* Search + Filter */}
-
-        <div className="row mb-4">
-
-          <div className="col-md-6 mb-2">
+          <div className="col-md-6">
 
             <input
               type="text"
               placeholder="Search Requests"
               className="form-control"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
             />
 
           </div>
 
-          <div className="col-md-6 mb-2">
+          <div className="col-md-6">
 
             <select
               className="form-select"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) =>
+                setStatusFilter(e.target.value)
+              }
             >
 
               <option value="">
                 All Status
               </option>
 
-              <option value="Pending">
+              <option value="pending">
                 Pending
               </option>
 
-              <option value="Completed">
+              <option value="completed">
                 Completed
               </option>
 
@@ -141,8 +156,6 @@ function Dashboard() {
           </div>
 
         </div>
-
-        {/* Cards */}
 
         <div className="row">
 
@@ -160,29 +173,26 @@ function Dashboard() {
                 className="col-md-6 col-lg-4 mb-4"
               >
 
-                <div className="card shadow-lg border-0 rounded-4 h-100">
+                <div className="card shadow-lg h-100">
 
-                  {/* IMAGE */}
-
-                  <img
-                    src={
-                      req.image
-                        ? `https://zepnest-backend.onrender.com/uploads/${req.image}`
-                        : 'https://via.placeholder.com/400x250'
-                    }
-                    alt="request"
-                    className="card-img-top"
-                    style={{
-                      height: '250px',
-                      objectFit: 'cover',
-                      borderTopLeftRadius: '16px',
-                      borderTopRightRadius: '16px'
-                    }}
-                  />
+                  {
+                    req.image &&
+                    (
+                      <img
+                        src={req.image}
+                        alt="request"
+                        className="card-img-top"
+                        height="240"
+                        style={{
+                          objectFit: "cover"
+                        }}
+                      />
+                    )
+                  }
 
                   <div className="card-body d-flex flex-column">
 
-                    <h3 className="fw-bold">
+                    <h3 className="mb-3">
                       {req.title}
                     </h3>
 
@@ -191,21 +201,22 @@ function Dashboard() {
                     </p>
 
                     <p>
-                      <strong>Category:</strong>{' '}
+                      <strong>Category:</strong>
+                      {' '}
                       {req.category}
                     </p>
 
                     <p>
-
-                      <strong>Status:</strong>{' '}
+                      <strong>Status:</strong>
+                      {' '}
 
                       <span
                         className={
-                          req.status === 'Completed'
+                          req.status === 'completed'
                           ?
-                          'badge bg-success'
+                          'text-success'
                           :
-                          'badge bg-warning text-dark'
+                          'text-warning'
                         }
                       >
                         {req.status}
@@ -215,28 +226,13 @@ function Dashboard() {
 
                     <div className="mt-auto">
 
-                      {
-                        req.status !== 'Completed' && (
-
-                          <button
-                            className="btn btn-success me-2"
-                            onClick={() =>
-                              updateStatus(req.id)
-                            }
-                          >
-                            Complete
-                          </button>
-
-                        )
-                      }
-
                       <button
-                        className="btn btn-warning me-2"
+                        className="btn btn-success me-2"
                         onClick={() =>
-                          deleteRequest(req.id)
+                          updateStatus(req.id)
                         }
                       >
-                        Cancel
+                        Complete
                       </button>
 
                       <button
@@ -262,7 +258,9 @@ function Dashboard() {
         </div>
 
       </div>
+
     </>
+
   );
 }
 
