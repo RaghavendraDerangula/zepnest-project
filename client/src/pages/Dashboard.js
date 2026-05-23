@@ -1,35 +1,20 @@
-import React, {
-  useEffect,
-  useState
-} from 'react';
-
-import API from '../services/api';
-
-import Navbar from '../components/Navbar';
-
-import {
-  toast
-} from 'react-toastify';
+import React, { useEffect, useState } from "react";
+import API from "../services/api";
+import Navbar from "../components/Navbar";
 
 function Dashboard() {
 
   const [requests, setRequests] = useState([]);
 
-  const [search, setSearch] = useState('');
-
-  const [statusFilter, setStatusFilter] = useState('');
-
   useEffect(() => {
-
     fetchRequests();
-
   }, []);
 
   const fetchRequests = async () => {
 
     try {
 
-      const res = await API.get('/requests');
+      const res = await API.get("/requests");
 
       setRequests(res.data);
 
@@ -37,69 +22,19 @@ function Dashboard() {
 
       console.log(err);
 
-      toast.error('Failed to Fetch Requests');
-
     }
+
   };
 
-  const deleteRequest = async (id) => {
+  const totalRequests = requests.length;
 
-    try {
+  const pendingRequests = requests.filter(
+    (req) => req.status === "pending"
+  ).length;
 
-      await API.delete(`/requests/${id}`);
-
-      toast.success('Request Deleted');
-
-      fetchRequests();
-
-    } catch (err) {
-
-      console.log(err);
-
-      toast.error('Delete Failed');
-
-    }
-  };
-
-  const updateStatus = async (id) => {
-
-    try {
-
-      await API.put(
-        `/requests/${id}`,
-        {
-          status: 'completed'
-        }
-      );
-
-      toast.success('Status Updated');
-
-      fetchRequests();
-
-    } catch (err) {
-
-      console.log(err);
-
-      toast.error('Update Failed');
-
-    }
-  };
-
-  const filteredRequests = requests.filter((req) => {
-
-    const matchesSearch =
-      req.title
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === ''
-      ||
-      req.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-
-  });
+  const completedRequests = requests.filter(
+    (req) => req.status === "completed"
+  ).length;
 
   return (
 
@@ -109,71 +44,187 @@ function Dashboard() {
 
       <div className="container mt-5">
 
-        <h1 className="dashboard-title text-center mb-4">
-          My Service Requests
+        <h1
+          style={{
+            fontWeight: "700",
+            fontSize: "45px"
+          }}
+        >
+          Hello, Raghavendra 👋
         </h1>
 
-        <div className="row mb-4 search-section">
+        <p className="text-muted mb-5">
+          Here's an overview of your service requests.
+        </p>
 
-          <div className="col-md-6">
+        <div className="row mb-5">
 
-            <input
-              type="text"
-              placeholder="Search Requests"
-              className="form-control"
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-            />
+          <div className="col-md-4 mb-3">
 
-          </div>
-
-          <div className="col-md-6">
-
-            <select
-              className="form-select"
-              value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value)
-              }
+            <div
+              className="card shadow-sm border-0 p-4 text-center"
+              style={{
+                borderRadius: "20px"
+              }}
             >
 
-              <option value="">
-                All Status
-              </option>
+              <h1 style={{ color: "#ff6600" }}>
+                {totalRequests}
+              </h1>
 
-              <option value="pending">
-                Pending
-              </option>
+              <p className="mt-2">
+                Total Requests
+              </p>
 
-              <option value="completed">
-                Completed
-              </option>
-
-            </select>
+            </div>
 
           </div>
+
+          <div className="col-md-4 mb-3">
+
+            <div
+              className="card shadow-sm border-0 p-4 text-center"
+              style={{
+                borderRadius: "20px"
+              }}
+            >
+
+              <h1 style={{ color: "#e6b800" }}>
+                {pendingRequests}
+              </h1>
+
+              <p className="mt-2">
+                Pending
+              </p>
+
+            </div>
+
+          </div>
+
+          <div className="col-md-4 mb-3">
+
+            <div
+              className="card shadow-sm border-0 p-4 text-center"
+              style={{
+                borderRadius: "20px"
+              }}
+            >
+
+              <h1 style={{ color: "green" }}>
+                {completedRequests}
+              </h1>
+
+              <p className="mt-2">
+                Completed
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          className="p-5 mb-5"
+          style={{
+            background: "#ff5c00",
+            borderRadius: "20px",
+            color: "white"
+          }}
+        >
+
+          <div className="d-flex justify-content-between align-items-center">
+
+            <div>
+
+              <h2>
+                Need a home service?
+              </h2>
+
+              <p>
+                Create a new request and we'll get it done.
+              </p>
+
+            </div>
+
+            <a
+              href="/create-request"
+              className="btn btn-light btn-lg"
+            >
+              + New Request
+            </a>
+
+          </div>
+
+        </div>
+
+        <div className="d-flex justify-content-between mb-4">
+
+          <h2>
+            Recent Requests
+          </h2>
+
+          <a
+            href="/requests"
+            style={{
+              color: "#ff5c00",
+              textDecoration: "none",
+              fontWeight: "600"
+            }}
+          >
+            View all →
+          </a>
 
         </div>
 
         <div className="row">
 
           {
-            filteredRequests.length === 0
-            ?
-            <p className="text-center">
-              No Requests Found
-            </p>
-            :
-            filteredRequests.map((req) => (
+            requests.map((req) => (
 
               <div
+                className="col-md-6 mb-4"
                 key={req.id}
-                className="col-md-6 col-lg-4 mb-4"
               >
 
-                <div className="card shadow-lg h-100">
+                <div
+                  className="card shadow-sm border-0 p-4"
+                  style={{
+                    borderRadius: "20px"
+                  }}
+                >
+
+                  <div className="d-flex justify-content-between">
+
+                    <div>
+
+                      <h4>
+                        {req.title}
+                      </h4>
+
+                      <p className="text-muted">
+                        {req.category}
+                      </p>
+
+                    </div>
+
+                    <span
+                      className={
+                        req.status === "completed"
+                        ?
+                        "badge bg-success"
+                        :
+                        "badge bg-warning text-dark"
+                      }
+                      style={{
+                        height: "30px",
+                        padding: "10px"
+                      }}
+                    >
+                      {req.status}
+                    </span>
+
+                  </div>
 
                   {
                     req.image &&
@@ -181,72 +232,16 @@ function Dashboard() {
                       <img
                         src={req.image}
                         alt="request"
-                        className="card-img-top"
-                        height="240"
+                        className="img-fluid mt-3"
                         style={{
-                          objectFit: "cover"
+                          borderRadius: "15px",
+                          height: "250px",
+                          objectFit: "cover",
+                          width: "100%"
                         }}
                       />
                     )
                   }
-
-                  <div className="card-body d-flex flex-column">
-
-                    <h3 className="mb-3">
-                      {req.title}
-                    </h3>
-
-                    <p className="text-muted">
-                      {req.description}
-                    </p>
-
-                    <p>
-                      <strong>Category:</strong>
-                      {' '}
-                      {req.category}
-                    </p>
-
-                    <p>
-                      <strong>Status:</strong>
-                      {' '}
-
-                      <span
-                        className={
-                          req.status === 'completed'
-                          ?
-                          'text-success'
-                          :
-                          'text-warning'
-                        }
-                      >
-                        {req.status}
-                      </span>
-
-                    </p>
-
-                    <div className="mt-auto">
-
-                      <button
-                        className="btn btn-success me-2"
-                        onClick={() =>
-                          updateStatus(req.id)
-                        }
-                      >
-                        Complete
-                      </button>
-
-                      <button
-                        className="btn btn-danger"
-                        onClick={() =>
-                          deleteRequest(req.id)
-                        }
-                      >
-                        Delete
-                      </button>
-
-                    </div>
-
-                  </div>
 
                 </div>
 
@@ -262,6 +257,7 @@ function Dashboard() {
     </>
 
   );
+
 }
 
 export default Dashboard;
