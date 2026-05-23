@@ -19,9 +19,6 @@ function Dashboard() {
 
   const [statusFilter, setStatusFilter] = useState('');
 
-  const user =
-    JSON.parse(localStorage.getItem("user"));
-
   useEffect(() => {
 
     fetchRequests();
@@ -64,14 +61,14 @@ function Dashboard() {
     }
   };
 
-  const updateStatus = async (id, status) => {
+  const updateStatus = async (id) => {
 
     try {
 
       await API.put(
         `/requests/${id}`,
         {
-          status
+          status: 'completed'
         }
       );
 
@@ -98,8 +95,7 @@ function Dashboard() {
     const matchesStatus =
       statusFilter === ''
       ||
-      req.status?.toLowerCase() ===
-      statusFilter.toLowerCase();
+      req.status === statusFilter;
 
     return matchesSearch && matchesStatus;
 
@@ -113,21 +109,9 @@ function Dashboard() {
 
       <div className="container mt-5">
 
-        {/* HELLO */}
-
-        <div className="mb-4">
-
-          <h1 className="fw-bold">
-            Hello, {user?.name || "User"} 👋
-          </h1>
-
-          <p className="text-muted">
-            Here's an overview of your service requests.
-          </p>
-
-        </div>
-
-        {/* SEARCH + FILTER */}
+        <h1 className="dashboard-title text-center mb-4">
+          My Service Requests
+        </h1>
 
         <div className="row mb-4 search-section">
 
@@ -159,16 +143,12 @@ function Dashboard() {
                 All Status
               </option>
 
-              <option value="Pending">
+              <option value="pending">
                 Pending
               </option>
 
-              <option value="Completed">
+              <option value="completed">
                 Completed
-              </option>
-
-              <option value="Cancelled">
-                Cancelled
               </option>
 
             </select>
@@ -176,8 +156,6 @@ function Dashboard() {
           </div>
 
         </div>
-
-        {/* REQUESTS */}
 
         <div className="row">
 
@@ -195,22 +173,18 @@ function Dashboard() {
                 className="col-md-6 col-lg-4 mb-4"
               >
 
-                <div className="card shadow-lg h-100 rounded-4 border-0">
-
-                  {/* IMAGE */}
+                <div className="card shadow-lg h-100">
 
                   {
                     req.image &&
                     (
                       <img
-                        src={`https://zepnest-backend.onrender.com/uploads/${req.image}`}
+                        src={req.image}
                         alt="request"
                         className="card-img-top"
+                        height="240"
                         style={{
-                          height: '240px',
-                          objectFit: 'cover',
-                          borderTopLeftRadius: '16px',
-                          borderTopRightRadius: '16px'
+                          objectFit: "cover"
                         }}
                       />
                     )
@@ -218,7 +192,7 @@ function Dashboard() {
 
                   <div className="card-body d-flex flex-column">
 
-                    <h3 className="mb-3 fw-bold">
+                    <h3 className="mb-3">
                       {req.title}
                     </h3>
 
@@ -238,15 +212,11 @@ function Dashboard() {
 
                       <span
                         className={
-                          req.status === 'Completed'
+                          req.status === 'completed'
                           ?
-                          'badge bg-success'
+                          'text-success'
                           :
-                          req.status === 'Cancelled'
-                          ?
-                          'badge bg-danger'
-                          :
-                          'badge bg-warning text-dark'
+                          'text-warning'
                         }
                       >
                         {req.status}
@@ -256,45 +226,14 @@ function Dashboard() {
 
                     <div className="mt-auto">
 
-                      {
-                        req.status !== 'Completed'
-                        &&
-                        req.status !== 'Cancelled'
-                        &&
-                        (
-                          <button
-                            className="btn btn-success me-2"
-                            onClick={() =>
-                              updateStatus(
-                                req.id,
-                                'Completed'
-                              )
-                            }
-                          >
-                            Complete
-                          </button>
-                        )
-                      }
-
-                      {
-                        req.status !== 'Completed'
-                        &&
-                        req.status !== 'Cancelled'
-                        &&
-                        (
-                          <button
-                            className="btn btn-warning me-2"
-                            onClick={() =>
-                              updateStatus(
-                                req.id,
-                                'Cancelled'
-                              )
-                            }
-                          >
-                            Cancel
-                          </button>
-                        )
-                      }
+                      <button
+                        className="btn btn-success me-2"
+                        onClick={() =>
+                          updateStatus(req.id)
+                        }
+                      >
+                        Complete
+                      </button>
 
                       <button
                         className="btn btn-danger"
