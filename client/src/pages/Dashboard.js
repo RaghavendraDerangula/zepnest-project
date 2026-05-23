@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
-import API from "../services/api";
-import Navbar from "../components/Navbar";
+import React, { useEffect, useState } from 'react';
+import API from '../services/api';
+import Navbar from '../components/Navbar';
+import { toast } from 'react-toastify';
 
 function Dashboard() {
 
   const [requests, setRequests] = useState([]);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     fetchRequests();
@@ -14,234 +17,227 @@ function Dashboard() {
 
     try {
 
-      const res = await API.get("/requests");
+      const res = await API.get('/requests');
 
       setRequests(res.data);
 
     } catch (err) {
 
       console.log(err);
+      toast.error('Failed to Fetch Requests');
 
     }
-
   };
 
-  const totalRequests = requests.length;
+  const deleteRequest = async (id) => {
 
-  const pendingRequests = requests.filter(
-    (req) => req.status === "pending"
-  ).length;
+    try {
 
-  const completedRequests = requests.filter(
-    (req) => req.status === "completed"
-  ).length;
+      await API.delete(`/requests/${id}`);
+
+      toast.success('Request Cancelled');
+
+      fetchRequests();
+
+    } catch (err) {
+
+      console.log(err);
+      toast.error('Cancel Failed');
+
+    }
+  };
+
+  const updateStatus = async (id) => {
+
+    try {
+
+      await API.put(`/requests/${id}`, {
+        status: 'Completed'
+      });
+
+      toast.success('Status Updated');
+
+      fetchRequests();
+
+    } catch (err) {
+
+      console.log(err);
+      toast.error('Update Failed');
+
+    }
+  };
+
+  const filteredRequests = requests.filter((req) => {
+
+    const matchesSearch =
+      req.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === ''
+      ||
+      req.status?.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus;
+
+  });
 
   return (
-
     <>
-
       <Navbar />
 
       <div className="container mt-5">
 
-        <h1
-          style={{
-            fontWeight: "700",
-            fontSize: "45px"
-          }}
-        >
-          Hello, Raghavendra 👋
+        <h1 className="dashboard-title text-center mb-4">
+          My Service Requests
         </h1>
 
-        <p className="text-muted mb-5">
-          Here's an overview of your service requests.
-        </p>
+        {/* Search + Status Filter */}
 
-        <div className="row mb-5">
+        <div className="row mb-4 search-section">
 
-          <div className="col-md-4 mb-3">
+          <div className="col-md-6 mb-2">
 
-            <div
-              className="card shadow-sm border-0 p-4 text-center"
-              style={{
-                borderRadius: "20px"
-              }}
-            >
-
-              <h1 style={{ color: "#ff6600" }}>
-                {totalRequests}
-              </h1>
-
-              <p className="mt-2">
-                Total Requests
-              </p>
-
-            </div>
+            <input
+              type="text"
+              placeholder="Search Requests"
+              className="form-control"
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+            />
 
           </div>
 
-          <div className="col-md-4 mb-3">
+          <div className="col-md-6 mb-2">
 
-            <div
-              className="card shadow-sm border-0 p-4 text-center"
-              style={{
-                borderRadius: "20px"
-              }}
+            <select
+              className="form-select"
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(e.target.value)
+              }
             >
 
-              <h1 style={{ color: "#e6b800" }}>
-                {pendingRequests}
-              </h1>
+              <option value="">
+                All Status
+              </option>
 
-              <p className="mt-2">
+              <option value="Pending">
                 Pending
-              </p>
+              </option>
 
-            </div>
-
-          </div>
-
-          <div className="col-md-4 mb-3">
-
-            <div
-              className="card shadow-sm border-0 p-4 text-center"
-              style={{
-                borderRadius: "20px"
-              }}
-            >
-
-              <h1 style={{ color: "green" }}>
-                {completedRequests}
-              </h1>
-
-              <p className="mt-2">
+              <option value="Completed">
                 Completed
-              </p>
+              </option>
 
-            </div>
-
-          </div>
-
-        </div>
-
-        <div
-          className="p-5 mb-5"
-          style={{
-            background: "#ff5c00",
-            borderRadius: "20px",
-            color: "white"
-          }}
-        >
-
-          <div className="d-flex justify-content-between align-items-center">
-
-            <div>
-
-              <h2>
-                Need a home service?
-              </h2>
-
-              <p>
-                Create a new request and we'll get it done.
-              </p>
-
-            </div>
-
-            <a
-              href="/create-request"
-              className="btn btn-light btn-lg"
-            >
-              + New Request
-            </a>
+            </select>
 
           </div>
 
         </div>
 
-        <div className="d-flex justify-content-between mb-4">
-
-          <h2>
-            Recent Requests
-          </h2>
-
-          <a
-            href="/requests"
-            style={{
-              color: "#ff5c00",
-              textDecoration: "none",
-              fontWeight: "600"
-            }}
-          >
-            View all →
-          </a>
-
-        </div>
+        {/* Cards */}
 
         <div className="row">
 
           {
-            requests.map((req) => (
+            filteredRequests.length === 0
+            ?
+            <p className="text-center">
+              No Requests Found
+            </p>
+            :
+            filteredRequests.map((req) => (
 
               <div
-                className="col-md-6 mb-4"
                 key={req.id}
+                className="col-md-6 col-lg-4 mb-4"
               >
 
-                <div
-                  className="card shadow-sm border-0 p-4"
-                  style={{
-                    borderRadius: "20px"
-                  }}
-                >
+                <div className="card shadow-lg h-100 border-0 rounded-4">
 
-                  <div className="d-flex justify-content-between">
+                  {/* Image */}
 
-                    <div>
+                  <img
+                    src={
+                      req.image
+                        ? `https://zepnest-backend.onrender.com/uploads/${req.image}`
+                        : 'https://via.placeholder.com/400x250'
+                    }
+                    alt="request"
+                    className="card-img-top"
+                    style={{
+                      height: '240px',
+                      objectFit: 'cover',
+                      borderTopLeftRadius: '16px',
+                      borderTopRightRadius: '16px'
+                    }}
+                  />
 
-                      <h4>
-                        {req.title}
-                      </h4>
+                  <div className="card-body d-flex flex-column">
 
-                      <p className="text-muted">
-                        {req.category}
-                      </p>
+                    <h4 className="fw-bold mb-2">
+                      {req.title}
+                    </h4>
+
+                    <p className="text-muted">
+                      {req.description}
+                    </p>
+
+                    <p>
+                      <strong>Category:</strong>{' '}
+                      {req.category}
+                    </p>
+
+                    <p>
+                      <strong>Status:</strong>{' '}
+
+                      <span
+                        className={
+                          req.status === 'Completed'
+                          ?
+                          'badge bg-success'
+                          :
+                          'badge bg-warning text-dark'
+                        }
+                      >
+                        {req.status}
+                      </span>
+
+                    </p>
+
+                    <div className="mt-auto">
+
+                      {
+                        req.status !== 'Completed' && (
+
+                          <button
+                            className="btn btn-success me-2"
+                            onClick={() =>
+                              updateStatus(req.id)
+                            }
+                          >
+                            Complete
+                          </button>
+
+                        )
+                      }
+
+                      <button
+                        className="btn btn-danger"
+                        onClick={() =>
+                          deleteRequest(req.id)
+                        }
+                      >
+                        Cancel
+                      </button>
 
                     </div>
 
-                    <span
-                      className={
-                        req.status === "completed"
-                        ?
-                        "badge bg-success"
-                        :
-                        "badge bg-warning text-dark"
-                      }
-                      style={{
-                        height: "30px",
-                        padding: "10px"
-                      }}
-                    >
-                      {req.status}
-                    </span>
-
                   </div>
-
-                  {
-                    req.image &&
-                    (
-                      <img
-                        src={req.image}
-                        alt="request"
-                        className="img-fluid mt-3"
-                        style={{
-                          borderRadius: "15px",
-                          height: "250px",
-                          objectFit: "cover",
-                          width: "100%"
-                        }}
-                      />
-                    )
-                  }
 
                 </div>
 
@@ -253,11 +249,8 @@ function Dashboard() {
         </div>
 
       </div>
-
     </>
-
   );
-
 }
 
 export default Dashboard;
